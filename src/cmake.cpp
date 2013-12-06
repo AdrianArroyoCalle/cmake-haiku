@@ -1,6 +1,6 @@
 /*
  * Copyright 2012 Adrián Arroyo Calle <adrian.arroyocalle@gmail.com>
- * All rights reserved. Distributed under the terms of the LPGL license.
+ * All rights reserved. Distributed under the terms of the Apache v2 license.
  */
 
 
