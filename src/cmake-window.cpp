@@ -15,15 +15,6 @@
 
 //Events for the programm
 const int32 EXIT_CMAKE='EXIT';
-const int32 CHANGE_SRC_DIR='R';
-const int32 CHANGE_OUT_DIR='O';
-const int32 SET_PROJECT='J';
-const int32 ADD_SUB='SUB';
-const int32 ADD_LIB='LIB';
-const int32 ADD_EXE='EXE';
-const int32 ADD_LINE='LIN';
-const int32 INCLUDE='INC';
-const int32 LINK_LIB='LINK';
 const int32 GENERATE='GEN';
 const int32 EDIT='EDIT';
 const int32 RUN='RUN';
@@ -40,7 +31,6 @@ unsigned char color[3]={220,220,220};
 CMakeWindow::CMakeWindow(BRect frame) 
 	: BWindow(frame, "CMake for Haiku", B_TITLED_WINDOW,0)
 {
-	count=0;
 	view = new BView(Bounds(), NULL, B_FOLLOW_ALL_SIDES, B_WILL_DRAW);
 	AddChild(view);
 
@@ -111,61 +101,6 @@ CMakeWindow::MessageReceived(BMessage* msg)
 			QuitRequested();
 			break;
 		}
-		
-
-		
-		//Change source dir
-		case CHANGE_SRC_DIR:
-		{
-			puts(srcdir->Text());
-			dirsrc=srcdir->Text();
-			break;
-		}
-
-
-
-		//Change output dir
-		case CHANGE_OUT_DIR:
-		{
-			puts(outdir->Text());
-			dirout=outdir->Text();
-			break;
-		}
-		//Open StyledEdit with CMakeLists.txt
-		case EDIT:
-		{
-			system("StyledEdit CMakeLists.txt");
-			break;
-		}
-
-
-		//Build the project
-		case RUN:
-		{
-			exit->SetLabel("Now building");
-			char exe[2048]="cmake ";
-			char make[2048]="make -C ";
-			strcat(exe,dirsrc);
-			system(exe);
-			strcat(make,dirsrc);
-			system(make);
-			exit->SetLabel("Exit CMake");
-			break;
-		}
-
-
-		//Add a line to char array and create a BCheckBox
-		case ADD_LINE:
-		{
-			line[count]=projecttc->Text();
-			linecheck[count]=new BCheckBox(BRect(158,((count+5)*25),400,25),NULL
-				,projecttc->Text(),new BMessage(SET_PROJECT));
-			view->AddChild(linecheck[count]);
-			count++;
-			puts(projecttc->Text());
-			break;
-		}
-
 		case SRC_DIR:
 		{
 			BFilePanel* panel=new BFilePanel(B_OPEN_PANEL,new BMessenger(this),NULL,
