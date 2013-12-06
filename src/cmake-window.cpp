@@ -6,6 +6,10 @@
 
 //includes
 #include <StorageKit.h>
+#include <InterfaceKit.h>
+#include <fstream>
+#include <iostream>
+#include <string>
 #include "main.hpp"
 #include "cmake-window.hpp"
 
@@ -29,8 +33,9 @@ const int32 SRC_DIR='SRC';
 const int32 OUT_DIR='OUT';
 const int32 SRC_DIR_PANEL='SRC_';
 const int32 OUT_DIR_PANEL='OUT_';
+const int32 SELECT='SEL';
+const int32 APPLY='APPL';
 unsigned char color[3]={220,220,220};
-
 
 CMakeWindow::CMakeWindow(BRect frame) 
 	: BWindow(frame, "CMake for Haiku", B_TITLED_WINDOW,0)
@@ -67,7 +72,15 @@ CMakeWindow::CMakeWindow(BRect frame)
 	exit=new BButton(BRect(4,400,200,50),NULL,"Exit CMake",
 		new BMessage(EXIT_CMAKE));
 	view->AddChild(exit);
-                
+	
+	options=new BListView(BRect(200,100,600,400),NULL,B_SINGLE_SELECTION_LIST);
+	view->AddChild(new BScrollView(NULL,options,B_FOLLOW_LEFT|B_FOLLOW_TOP,0,false,true));
+    
+    edit=new BTextControl(BRect(200,450,600,50),NULL,NULL,NULL,NULL);
+    view->AddChild(edit);
+	apply=new BButton(BRect(600,450,700,50),NULL,"Apply",
+		new BMessage(APPLY));
+	view->AddChild(apply);            
 }
 
 
@@ -118,26 +131,6 @@ CMakeWindow::MessageReceived(BMessage* msg)
 			dirout=outdir->Text();
 			break;
 		}
-
-
-		//Create CMakeLists.txt with the data of the char array
-		case GENERATE:
-		{
-			FILE* cachefile;
-			cachefile=fopen("CMakeLists.txt","w");
-			int aux;
-			fprintf(cachefile,"SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY %s)\n",outdir->Text()); // Set output dir
-			for(aux=0;aux!=2048;aux++){
-				if(line[aux]==NULL){   //There aren't any more lines
-						break;
-				}
-				fprintf(cachefile,"%s\n",line[aux]); //Write in file
-			}
-			fclose(cachefile); //Close and save file          
-			break;      
-		}
-
-
 		//Open StyledEdit with CMakeLists.txt
 		case EDIT:
 		{
@@ -216,6 +209,71 @@ CMakeWindow::MessageReceived(BMessage* msg)
 				}	
 			}	
 			break;
+		}
+		case GENERATE:
+		{
+			BAlert* wait=new BAlert("CMake for Haiku","Please, wait while we are generating the project",
+				"I understand",NULL,NULL,B_WIDTH_AS_USUAL,B_IDEA_ALERT);
+			wait->Go(NULL);
+			BString cmd="cd ";
+			cmd.Append(outTextDir->Text());
+			cmd.Append(" && cmake ");
+			cmd.Append(srcTextDir->Text());
+			system(cmd.String());
+			wait->Quit();
+			BAlert* ok=new BAlert("CMake for Haiku","Generated! Now you can build as usual",
+				"OK",NULL,NULL,B_WIDTH_AS_USUAL,B_INFO_ALERT);
+			ok->Go();
+			break;
+		}
+		case CONF:
+		{
+			BAlert* wait=new BAlert("CMake for Haiku","Please, wait while we are configurating the project",
+				"I understand",NULL,NULL,B_WIDTH_AS_USUAL,B_IDEA_ALERT);
+			wait->Go(NULL);
+			BString cmd="cd ";
+			cmd.Append(outTextDir->Text());
+			cmd.Append(" && cmake ");
+			cmd.Append(srcTextDir->Text());
+			system(cmd.String());
+			wait->Quit();
+			BString cacheFile=outTextDir->Text();
+			cacheFile.Append("/CMakeCache.txt");
+			std::ifstream cache;
+			cache.open(cacheFile.String());
+			std::string line;
+			while(std::getline(cache,line))
+			{
+				if(line.find("//")!=0 && line.find("#")!=0 && line.compare("\n")!=0)
+				{
+					BString item=line.c_str();
+					options->AddItem(new BStringItem(item));
+				}
+			}
+			cache.close();
+			options->SetSelectionMessage(new BMessage(SELECT));
+			break;
+		}
+		case SELECT:
+		{
+			int32 index=options->CurrentSelection();
+			edit->SetText(((BStringItem*)options->ItemAt(index))->Text());
+			break;
+		}
+		case APPLY:
+		{
+			int32 index=options->CurrentSelection();
+			options->ReplaceItem(index,new BStringItem(edit->Text()));
+			std::fstream cache;
+			BString cacheFile=outTextDir->Text();
+			cacheFile.Append("/CMakeCache.txt");
+			cache.open(cacheFile, std::fstream::out | std::fstream::trunc);
+			for(int32 i=0;i<options->CountItems();i++)
+			{
+				cache << ((BStringItem*)options->ItemAt(i))->Text() << "\n";
+			}
+			cache.close();
+			
 		}
 		default:
 		{

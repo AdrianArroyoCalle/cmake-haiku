@@ -29,6 +29,9 @@ private:
 	const char*		dirout;
 	BEntry*			srcEntry;
 	BEntry*			outEntry;
+	BListView*	options;
+	BTextControl*	edit;
+	BButton*		apply;
 	
 };
 
