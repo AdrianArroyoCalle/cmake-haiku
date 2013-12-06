@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Adrián Arroyo Calle <adrian.arroyocalle@gmail.com>
+ * Copyright 2012-2013 Adrián Arroyo Calle <adrian.arroyocalle@gmail.com>
  * All rights reserved. Distributed under the terms of the Apache v2 license.
  */
 #ifndef CMAKE_WINDOW_HPP
@@ -9,6 +9,8 @@ class CMakeWindow  :  public BWindow
 {
 public:
 	CMakeWindow(BRect frame);
+	BTextControl*	srcTextDir;
+	BTextControl*	outTextDir;
 	BTextControl*	srcdir;
 	BTextControl*	outdir;
 	BTextControl*	projecttc;
@@ -25,6 +27,8 @@ private:
 	const char*		line[2048];
 	const char*		dirsrc;
 	const char*		dirout;
+	BEntry*			srcEntry;
+	BEntry*			outEntry;
 	
 };
 

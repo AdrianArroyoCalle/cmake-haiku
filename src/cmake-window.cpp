@@ -5,7 +5,7 @@
 
 
 //includes
-
+#include <StorageKit.h>
 #include "main.hpp"
 #include "cmake-window.hpp"
 
@@ -24,55 +24,45 @@ const int32 GENERATE='GEN';
 const int32 EDIT='EDIT';
 const int32 RUN='RUN';
 const int32 DELETE='DEL';
+const int32 CONF='CONF';
+const int32 SRC_DIR='SRC';
+const int32 OUT_DIR='OUT';
+const int32 SRC_DIR_PANEL='SRC_';
+const int32 OUT_DIR_PANEL='OUT_';
 unsigned char color[3]={220,220,220};
 
 
 CMakeWindow::CMakeWindow(BRect frame) 
 	: BWindow(frame, "CMake for Haiku", B_TITLED_WINDOW,0)
 {
-
-	//Create GUI interface with buttons and BTextControls
 	count=0;
 	view = new BView(Bounds(), NULL, B_FOLLOW_ALL_SIDES, B_WILL_DRAW);
 	AddChild(view);
 
 	view->SetViewColor(color[0],color[1],color[2]); //SetColor of the frame
+	
+	BButton* srcDir=new BButton(BRect(4,10,200,20),NULL,"Source dir",
+		new BMessage(SRC_DIR));
+	view->AddChild(srcDir);
+	
+	srcTextDir=new BTextControl(BRect(200,10,600,50),NULL,NULL,NULL,NULL);
+	view->AddChild(srcTextDir);
+	
+	
+	BButton* outDir=new BButton(BRect(4,60,200,50),NULL,"Output dir",
+		new BMessage(OUT_DIR));
+	view->AddChild(outDir);
+	
+	outTextDir=new BTextControl(BRect(200,60,600,50),NULL,NULL,NULL,NULL);
+	view->AddChild(outTextDir);
 
-	BButton* changesrc=new BButton(BRect(4,20,150,25),NULL,"Change source dir",
-		new BMessage(CHANGE_SRC_DIR));
-	view->AddChild(changesrc);
-
-	srcdir=new BTextControl(BRect(158,20,400,25),NULL,"Write the source dir"
-		,NULL,new BMessage(CHANGE_SRC_DIR));
-	view->AddChild(srcdir);
-
-	BButton* changeout=new BButton(BRect(4,60,150,25),NULL,"Change output dir"
-		,new BMessage(CHANGE_OUT_DIR));
-	view->AddChild(changeout);
-                
-	outdir=new BTextControl(BRect(158,60,400,25),NULL,"Write the output dir",
-		NULL,new BMessage(CHANGE_OUT_DIR));
-	view->AddChild(outdir);
-			
-    BButton* generate=new BButton(BRect(4,160,150,25),NULL,"Generate",
+	BButton* configure=new BButton(BRect(4,300,200,50),NULL,"Configure",
+		new BMessage(CONF));
+	view->AddChild(configure);
+	
+	BButton* generate=new BButton(BRect(4,350,200,50),NULL,"Generate",
 		new BMessage(GENERATE));
-    view->AddChild(generate);
-
-	BButton* seemake=new BButton(BRect(4,210,150,25),NULL,"Edit manually",
-		new BMessage(EDIT));
-	view->AddChild(seemake);
-
-	BButton* run=new BButton(BRect(4,260,150,25),NULL,"Build",
-		new BMessage(RUN));
-	view->AddChild(run);
-
-	projecttc=new BTextControl(BRect(158,110,400,25),NULL,"Write a line",
-		NULL,new BMessage(ADD_LINE));
-	view->AddChild(projecttc);
-
-	BButton* addline=new BButton(BRect(4,110,150,25),NULL,"Add line",
-		new BMessage(ADD_LINE));
-	view->AddChild(addline);
+	view->AddChild(generate);
                         
 	exit=new BButton(BRect(4,400,200,50),NULL,"Exit CMake",
 		new BMessage(EXIT_CMAKE));
@@ -183,6 +173,50 @@ CMakeWindow::MessageReceived(BMessage* msg)
 			break;
 		}
 
+		case SRC_DIR:
+		{
+			BFilePanel* panel=new BFilePanel(B_OPEN_PANEL,new BMessenger(this),NULL,
+				B_DIRECTORY_NODE,false, new BMessage(SRC_DIR_PANEL));
+			panel->Show();
+			break;
+		}
+		case SRC_DIR_PANEL:
+		{
+			if(msg->HasRef("refs"))
+			{
+				entry_ref ref;
+				if(msg->FindRef("refs",0,&ref) == B_OK)
+				{
+					BEntry entry(&ref,true);
+					BPath path;
+					entry.GetPath(&path);
+					srcTextDir->SetText(path.Path());
+				}
+			}
+			break;
+		}
+		case OUT_DIR:
+		{
+			BFilePanel* panel=new BFilePanel(B_OPEN_PANEL, new BMessenger(this),NULL,
+				B_DIRECTORY_NODE,false, new BMessage(OUT_DIR_PANEL));
+			panel->Show();
+			break;
+		}
+		case OUT_DIR_PANEL:
+		{
+			if(msg->HasRef("refs"))
+			{
+				entry_ref ref;
+				if(msg->FindRef("refs",0,&ref) == B_OK)
+				{
+					BEntry entry(&ref,true);
+					BPath path;
+					entry.GetPath(&path);
+					outTextDir->SetText(path.Path());
+				}	
+			}	
+			break;
+		}
 		default:
 		{
 			BWindow::MessageReceived(msg);
