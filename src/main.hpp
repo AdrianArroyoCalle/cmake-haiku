@@ -1,6 +1,6 @@
 /*
- * Copyright 2012 Adrián Arroyo Calle <adrian.arroyocalle@gmail.com>
- * All rights reserved. Distributed under the terms of the Apache v2 license.
+ * Copyright 2012-2013 Adrián Arroyo Calle <adrian.arroyocalle@gmail.com>
+ * All rights reserved. Distributed under the terms of the BSD-3 clause license.
  */
 #ifndef MAIN_HPP
 #define MAIN_HPP
