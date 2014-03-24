@@ -1,0 +1,20 @@
+resource app_signature "application/cmake-haiku";
+
+resource app_flags B_SINGLE_LAUNCH;
+
+resource app_version{
+	major = 2,
+	middle = 1,
+	minor = 0,
+	
+	variety	= B_APPV_FINAL,
+	internal = 1,
+	
+	short_info = "CMake for Haiku",
+	long_info = "CMake for Haiku is a GUI for cmake using Haiku native widgets"
+};
+resource vector_icon {
+	$"6E6369660403FF0000030000FF03197F000538040A043A3D3C49405C504C0A03"
+	$"2850405C2F460A033650405C36300A032850363D3630040A000102000A020101"
+	$"000A010103000A03010000"
+};
